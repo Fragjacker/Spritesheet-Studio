@@ -15,6 +15,11 @@
           "name": "OpenCV_DIR",
           "value": "D:/OpenCV/build_opencv",
           "type": "PATH"
+        },
+        {
+          "name": "wxWidgets_ROOT_DIR",
+          "value": "D:/wxWidgets/wxWidgets",
+          "type": "PATH"
         }
       ]
     },

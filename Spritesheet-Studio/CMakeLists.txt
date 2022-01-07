@@ -10,7 +10,7 @@ find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 # Add wxWidgets
-find_package(wxWidgets 3.1 REQUIRED)
+find_package(wxWidgets REQUIRED)
 include(${wxWidgets_USE_FILE})
 
 # Add executable linked with all the external libraries
