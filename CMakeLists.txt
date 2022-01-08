@@ -16,6 +16,7 @@ include(ExternalProject)
 ExternalProject_Add(${PROJECT_NAME}_core
   DEPENDS
     wxWidgets_external
+    OpenCV_external
   SOURCE_DIR
     ${CMAKE_CURRENT_SOURCE_DIR}/src
   CMAKE_ARGS
@@ -25,6 +26,7 @@ ExternalProject_Add(${PROJECT_NAME}_core
     -DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}
     -DCMAKE_CXX_STANDARD_REQUIRED=${CMAKE_CXX_STANDARD_REQUIRED}
     -DwxWidgets_ROOT_DIR=${wxWidgets_ROOT_DIR}
+    -DOpenCV_DIR=${OpenCV_DIR}
     -DENV_WX_CONFIG=${ENV_WX_CONFIG}
   CMAKE_CACHE_ARGS
     -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}

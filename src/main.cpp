@@ -1,6 +1,7 @@
 // wxWidgets "Hello world" Program
 // For compilers that support precompilation, includes "wx/wx.h".
 #include <wx/wxprec.h>
+#include <opencv2/opencv.hpp>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif
@@ -64,5 +65,10 @@ void MyFrame::OnAbout(wxCommandEvent &event)
 }
 void MyFrame::OnHello(wxCommandEvent &event)
 {
+    cv::Mat image;
+    image = cv::imread("thumbnail.png", 1);
+    cv::namedWindow("Display Image", cv::WINDOW_AUTOSIZE);
+    cv::imshow("Display Image", image);
+    cv::waitKey(0);
     wxLogMessage("Hello world from wxWidgets!");
 }
