@@ -5,6 +5,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif
+using namespace cv;
 class MyApp : public wxApp
 {
 public:
@@ -31,8 +32,17 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
             EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
                 wxEND_EVENT_TABLE()
                     wxIMPLEMENT_APP(MyApp);
+void showCVImage() {
+    Mat image;
+    image = imread("testimage.png", IMREAD_UNCHANGED);
+    namedWindow("Display Image", WINDOW_AUTOSIZE);
+    imshow("Display Image", image);
+    imwrite("testimage_opencv.png", image);
+    waitKey(0);
+}
 bool MyApp::OnInit()
 {
+    showCVImage();
     MyFrame *frame = new MyFrame("Hello World", wxPoint(50, 50), wxSize(450, 340));
     frame->Show(true);
     return true;
@@ -65,10 +75,5 @@ void MyFrame::OnAbout(wxCommandEvent &event)
 }
 void MyFrame::OnHello(wxCommandEvent &event)
 {
-    cv::Mat image;
-    image = cv::imread("thumbnail.png", 1);
-    cv::namedWindow("Display Image", cv::WINDOW_AUTOSIZE);
-    cv::imshow("Display Image", image);
-    cv::waitKey(0);
     wxLogMessage("Hello world from wxWidgets!");
 }

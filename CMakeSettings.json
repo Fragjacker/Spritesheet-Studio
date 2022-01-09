@@ -9,19 +9,7 @@
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "variables": [
-        {
-          "name": "wxWidgets_LIB_DIR",
-          "value": "D:/wxWidgets/wxWidgets/lib",
-          "type": "PATH"
-        },
-        {
-          "name": "wxWidgets_wxrc_EXECUTABLE",
-          "value": "D:/wxWidgets/wxWidgets",
-          "type": "FILEPATH"
-        }
-      ]
+      "ctestCommandArgs": ""
     },
     {
       "name": "x64-Release",
@@ -29,22 +17,9 @@
       "configurationType": "Release",
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
-      "variables": [
-        {
-          "name": "wxWidgets_LIB_DIR",
-          "value": "D:/wxWidgets/wxWidgets/lib",
-          "type": "PATH"
-        },
-        {
-          "name": "wxWidgets_wxrc_EXECUTABLE",
-          "value": "D:/wxWidgets/wxWidgets",
-          "type": "FILEPATH"
-        }
-      ]
+      "inheritEnvironments": [ "msvc_x64_x64" ]
     }
   ]
 }

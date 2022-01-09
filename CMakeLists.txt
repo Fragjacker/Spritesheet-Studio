@@ -15,8 +15,8 @@ add_subdirectory(thirdparty)
 include(ExternalProject)
 ExternalProject_Add(${PROJECT_NAME}_core
   DEPENDS
-    wxWidgets_external
     OpenCV_external
+    wxWidgets_external
   SOURCE_DIR
     ${CMAKE_CURRENT_SOURCE_DIR}/src
   CMAKE_ARGS

@@ -14,5 +14,5 @@ if (NOT OpenCV_contrib_POPULATED)
     FetchContent_Populate(OpenCV_contrib)
 endif ()
 
-add_subdirectory(wxwidgets)
 add_subdirectory(opencv)
+add_subdirectory(wxwidgets)
