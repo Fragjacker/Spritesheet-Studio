@@ -7,20 +7,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set( APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/icon.rc" )
 
-# hack for buggy CMake's FindwxWidgets script
-if (DEFINED ENV_WX_CONFIG)
-    set (ENV{WX_CONFIG} ${ENV_WX_CONFIG})
-endif()
-
 set(OpenCV_STATIC 1)
-set(wxWidgets_USE_STATIC 1)
+set(FLTK_STATIC 1)
 
-find_package(wxWidgets REQUIRED)
+find_package(FLTK REQUIRED NO_MODULE)
 find_package(OpenCV REQUIRED)
 
 set(SRCS main.cpp)
 
-include(${wxWidgets_USE_FILE})
+include(${FLTK_USE_FILE})
+
+# Additional safety linking for FLTK because it uses no Cmake module.
+include_directories(${FLTK_INCLUDE_DIRS}) 
+link_directories(${FLTK_LIBRARY_DIRS}) 
+add_definitions(${FLTK_DEFINITIONS})
 
 if (APPLE)
     # create bundle on apple compiles
@@ -31,6 +31,6 @@ else()
     # the WIN32 is needed for Windows in order for it to look for WinMain
     # instead of the main function. This is ignored on other systems,
     # so it works on all platforms
-    add_executable(${PROJECT_NAME} WIN32 ${SRCS} ${APP_ICON_RESOURCE_WINDOWS})
+    add_executable(${PROJECT_NAME} ${SRCS} ${APP_ICON_RESOURCE_WINDOWS})
 endif()
-target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} ${OpenCV_LIBS} )
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} fltk)

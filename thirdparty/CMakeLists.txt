@@ -4,6 +4,8 @@ FetchContent_Declare(
 	OpenCV_contrib
 	GIT_REPOSITORY
 	https://github.com/opencv/opencv_contrib.git
+	GIT_PROGRESS
+    TRUE
 	GIT_TAG
 	master
 	UPDATE_COMMAND
@@ -15,4 +17,4 @@ if (NOT OpenCV_contrib_POPULATED)
 endif ()
 
 add_subdirectory(opencv)
-add_subdirectory(wxwidgets)
+add_subdirectory(FLTK)
