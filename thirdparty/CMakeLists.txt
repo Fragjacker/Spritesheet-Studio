@@ -5,7 +5,7 @@ FetchContent_Declare(
 	GIT_REPOSITORY
 	https://github.com/opencv/opencv_contrib.git
 	GIT_PROGRESS
-    TRUE
+    ON
 	GIT_TAG
 	master
 	UPDATE_COMMAND

@@ -13,7 +13,7 @@ else()
         GIT_REPOSITORY
         https://github.com/fltk/fltk.git
         GIT_PROGRESS
-        TRUE
+        ON
         GIT_TAG
         release-1.3.8
         UPDATE_COMMAND
