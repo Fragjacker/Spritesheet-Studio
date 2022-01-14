@@ -5,9 +5,11 @@
 Fl_Hor_Value_Slider* sliderrow = NULL;
 Fl_Hor_Value_Slider* slidercol = NULL;
 Fl_Output* G_filename = NULL;
+Fl_Button* butsave = NULL;
 Imagelist* img = NULL;
 const char* G_appname = "Spritesheet-Studio";
 const char* G_filterlist = "Portable network graphics\t*.png\n"
+"DirectDraw Surface Image\t*.dds\n"
 "Windows bitmap\t*.bmp\n"
 "Portable image formats\t*.{pbm,pgm,ppm}\n"
 "Sunraster\t*.{sr,ras}\n"
@@ -16,21 +18,38 @@ const char* G_filterlist = "Portable network graphics\t*.png\n"
 "TIFF\t*.{tiff,tif}";
 
 void PreLoadImages(Fl_Native_File_Chooser& chooser) {
+	delete img;
+	std::string res;
 	img = new Imagelist();
 	int numImages = chooser.count();
 	for (int t = 0; t < chooser.count(); t++) {
-		loadimage(*img, chooser.filename(t));
+		res = getFileExt(chooser.filename(t));
+		cout << res;
+		loadimage(*img, (string)chooser.filename(t), res);
 	}
 	sliderrow->maximum(numImages);
 	slidercol->maximum(numImages);
+	sliderrow->value(std::ceil(std::sqrt(numImages)));
+	slidercol->value(std::ceil(std::sqrt(numImages)));
 	G_filename->value(std::to_string(numImages).c_str());
 	slidercol->activate();
 	sliderrow->activate();
+	butsave->activate();
 };
 
 void ComputeSpritesheet(Fl_Widget*, void*) {
 	stitchimages(*img, sliderrow->value(), slidercol->value());
-}
+};
+
+
+std::string getFileExt(const char* c) {
+	string s = c;
+	size_t i = s.rfind('.', s.length());
+	if (i != string::npos) {
+		return(s.substr(i + 1, s.length() - i));
+	}
+	return("");
+};
 
 void PickFile_CB(Fl_Widget*, void*) {
 	// Create native chooser
@@ -102,9 +121,9 @@ void setupGUI(int argc, char** argv) {
 	win->color(colorbg);
 	win->begin();
 	{
-		int x = 80, y = 10;
+		int x = 10, y = 10;
 
-		G_filename = new Fl_Output(x, y, win->w() - 80 - 10, 25, "Num Files:");
+		G_filename = new Fl_Output(x + 70, y, 50, 25, "Num Files:");
 		G_filename->box(FL_FLAT_BOX);
 		G_filename->color(colorbut);
 		G_filename->value("");
@@ -112,27 +131,30 @@ void setupGUI(int argc, char** argv) {
 		G_filename->textcolor(colortext);
 		G_filename->labelcolor(colortext);
 
-		Fl_Button* but = new Fl_Button(win->w() - x - 10, win->h() - 25 - 10, 80, 25, "Pick File");
+		// FileIO buttons
+		Fl_Button* but = new Fl_Button(win->w() - x - 80, y, 80, 25, "Pick File");
 		but->callback(PickFile_CB);
 		but->box(FL_FLAT_BOX);
 		but->color(colorbut);
 		but->labelcolor(colortext);
 
-		Fl_Button* butdir = new Fl_Button(but->x() - x - 10, win->h() - 25 - 10, 80, 25, "Pick Dir");
+		Fl_Button* butdir = new Fl_Button(but->x() - x - but->w(), y, 80, 25, "Pick Dir");
 		butdir->callback(PickDir_CB);
 		butdir->box(FL_FLAT_BOX);
 		butdir->color(colorbut);
 		butdir->labelcolor(colortext);
 
 
-		Fl_Button* butsave = new Fl_Button(x - 10, win->h() - 25 - 10, 140, 25, "Save Spritesheet..");
+		butsave = new Fl_Button(win->w() - x - 140, win->h() - 25 - 10, 140, 25, "Save Spritesheet..");
 		butsave->callback(ComputeSpritesheet);
 		butsave->box(FL_FLAT_BOX);
 		butsave->color(colorbut);
 		butsave->labelcolor(colortext);
+		butsave->deactivate();
 
+		// Column and Row sliders
 		y += G_filename->h() + 20;
-		slidercol = new Fl_Hor_Value_Slider(x, y, win->w() / 2 - x, 20, "Number of Columns");
+		slidercol = new Fl_Hor_Value_Slider(x, y, (win->w() / 2) - x, 20, "Number of Columns");
 		slidercol->step(1);
 		slidercol->maximum(10);
 		slidercol->minimum(1);
@@ -142,8 +164,7 @@ void setupGUI(int argc, char** argv) {
 		slidercol->textcolor(colortext);
 		slidercol->labelcolor(colortext);
 
-
-		sliderrow = new Fl_Hor_Value_Slider(x + slidercol->w() + 20, y, win->w() / 2 - x, 20, "Number of Rows");
+		sliderrow = new Fl_Hor_Value_Slider(x + slidercol->w() + 20, y, (win->w() / 2) - x - 20, 20, "Number of Rows");
 		sliderrow->step(1);
 		sliderrow->maximum(10);
 		sliderrow->minimum(1);
@@ -155,7 +176,7 @@ void setupGUI(int argc, char** argv) {
 
 
 		y += slidercol->h() + 50;
-		Fl_Help_View* view = new Fl_Help_View(x, y, G_filename->w(), 200);
+		Fl_Help_View* view = new Fl_Help_View(x, y, win->w() * 0.8, 200);
 		view->box(FL_FLAT_BOX);
 		view->color(win->color());
 #define TAB "&lt;Tab&gt;"

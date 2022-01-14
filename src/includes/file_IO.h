@@ -1,5 +1,5 @@
+#include <string>		/* strstr() */
 #include <stdio.h>
-#include <string.h>		/* strstr() */
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Button.H>
@@ -12,6 +12,7 @@
 
 void PickFile_CB(Fl_Widget*, void*);
 void PickDir_CB(Fl_Widget*, void*);
+void ComputeSpritesheet(Fl_Widget*, void*);
+std::string getFileExt(const char* c);
 void setupGUI(int argc, char** argv);
 void PreLoadImages(Fl_Native_File_Chooser& chooser);
-void ComputeSpritesheet();

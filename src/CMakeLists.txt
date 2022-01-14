@@ -16,6 +16,7 @@ find_package(OpenCV REQUIRED)
 set(SRCS 
     main.cpp 
     opencv_image.cpp
+    dds_img_reader.cpp
     file_IO.cpp)
 
 include(${FLTK_USE_FILE})

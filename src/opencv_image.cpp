@@ -1,4 +1,5 @@
 #include "includes/opencv_image.h"
+#include "includes/dds_img_reader.h"
 #include <opencv2/core/opengl.hpp>
 // Global
 
@@ -12,23 +13,60 @@ void showCVImage() {
 	waitKey(0);
 }
 
+std::vector<BYTE> readFile(const char* filename)
+{
+	// open the file:
+	std::ifstream file(filename, std::ios::binary);
+
+	// Stop eating new lines in binary mode!!!
+	file.unsetf(std::ios::skipws);
+
+	// get its size:
+	std::streampos fileSize;
+
+	file.seekg(0, std::ios::end);
+	fileSize = file.tellg();
+	file.seekg(0, std::ios::beg);
+
+	// reserve capacity
+	std::vector<BYTE> vec;
+	vec.reserve(fileSize);
+
+	// read the data:
+	vec.insert(vec.begin(),
+		std::istream_iterator<BYTE>(file),
+		std::istream_iterator<BYTE>());
+
+	return vec;
+}
+
 // Loads a single image from a given path and adds it to the Imagelist obj.
-void loadimage(Imagelist& imglist, const char* dirpath) {
+void loadimage(Imagelist& imglist, string dirpath, string extension) {
 	Mat img;
-	img = imread(string(dirpath), IMREAD_UNCHANGED);
 	// Handle the case of 16 bits per channel unsigned images.
-	switch (img.depth())
+	if (extension.compare("dds") == 0)
 	{
-	case CV_16U:
-		img.convertTo(img, CV_8UC4, 1 / 256.0);
-		break;
-	case CV_32F:
-		img.convertTo(img, CV_8UC4, 1 / 16777216.0);
-		break;
-	default:
-		break;
+		Image dds_img;
+		dds_img = read_dds(readFile(dirpath.c_str()));
+		img = Mat(dds_img.height, dds_img.width, CV_8UC3, dds_img.data.data());
+		cvtColor(img, img, COLOR_BGR2RGBA);
 	}
-	cvtColor(img, img, COLOR_BGR2BGRA);
+	if (extension.compare("png") == 0)
+	{
+		img = imread(dirpath, IMREAD_UNCHANGED);
+		switch (img.depth())
+		{
+		case CV_16U:
+			img.convertTo(img, CV_8UC4, 1 / 256.0);
+			break;
+		case CV_32F:
+			img.convertTo(img, CV_8UC4, 1 / 16777216.0);
+			break;
+		default:
+			break;
+		}
+		cvtColor(img, img, COLOR_BGR2BGRA);
+	}
 	imglist.addimage(img);
 };
 
@@ -53,5 +91,6 @@ Mat stitchimages(Imagelist& imglist, int rows, int cols) {
 	imshow("cells.image", cells->getImage());
 	imwrite("merged_image.png", cells->getImage());
 	waitKey();
+	delete cells;
 	return temp_img;
 }

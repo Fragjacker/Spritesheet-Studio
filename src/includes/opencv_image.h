@@ -1,4 +1,7 @@
 #include <opencv2/opencv.hpp>
+#include <fstream>
+#include <vector>
+typedef unsigned char BYTE;
 using namespace cv;
 using namespace std;
 
@@ -65,5 +68,6 @@ public:
 };
 
 void showCVImage();
-void loadimage(Imagelist& imglist, const char* dirpath);
+void loadimage(Imagelist& imglist, string dirpath, string extension);
 Mat stitchimages(Imagelist& imglist, int rows, int cols);
+std::vector<BYTE> readFile(const char* filename);
