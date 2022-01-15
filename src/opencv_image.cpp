@@ -40,6 +40,20 @@ std::vector<BYTE> readFile(const char* filename)
 	return vec;
 }
 
+/// <summary>
+/// Reconstructs the alpha channel from a 8.8.8.8 DDS image since OpenCV is weird with alpha channels.
+/// </summary>
+/// <param name="img"></param>
+void reconstructAlphaChannel(cv::Mat& img)
+{
+	Mat channels[4];
+	split(img, channels);
+	Mat alpha = channels[3];
+	cvtColor(img, img, COLOR_BGRA2RGB);
+	Mat newchan[] = { channels[2], channels[1], channels[0], alpha };
+	merge(newchan, 4, img);
+}
+
 // Loads a single image from a given path and adds it to the Imagelist obj.
 void loadimage(Imagelist& imglist, string dirpath, string extension) {
 	Mat img;
@@ -48,8 +62,25 @@ void loadimage(Imagelist& imglist, string dirpath, string extension) {
 	{
 		Image dds_img;
 		dds_img = read_dds(readFile(dirpath.c_str()));
-		img = Mat(dds_img.height, dds_img.width, CV_8UC3, dds_img.data.data());
-		cvtColor(img, img, COLOR_BGR2RGBA);
+		switch (dds_img.bpp)
+		{
+		case 0:
+			img = Mat(dds_img.height, dds_img.width, CV_8UC4, dds_img.data.data());
+			reconstructAlphaChannel(img);
+			break;
+		case 24:
+			img = Mat(dds_img.height, dds_img.width, CV_8UC3, dds_img.data.data());
+			cvtColor(img, img, COLOR_BGR2RGBA);
+			break;
+		case 32:
+		{
+			img = Mat(dds_img.height, dds_img.width, CV_8UC4, dds_img.data.data());
+			reconstructAlphaChannel(img);
+		}
+			break;
+		default:
+			break;
+		}
 	}
 	if (extension.compare("png") == 0)
 	{
@@ -74,6 +105,7 @@ void loadimage(Imagelist& imglist, string dirpath, string extension) {
 Mat stitchimages(Imagelist& imglist, int rows, int cols) {
 	Mat temp_img, new_img;
 	list<Mat> worklist = imglist.getList();
+	worklist.reverse();
 	ImageCells* cells = new ImageCells(rows, cols, worklist.begin()->cols, worklist.begin()->rows);
 	list<Mat>::iterator it = worklist.begin();
 	for (int j = 0; j < cells->getrows(); ++j)

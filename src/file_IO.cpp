@@ -19,13 +19,10 @@ const char* G_filterlist = "Portable network graphics\t*.png\n"
 
 void PreLoadImages(Fl_Native_File_Chooser& chooser) {
 	delete img;
-	std::string res;
 	img = new Imagelist();
 	int numImages = chooser.count();
 	for (int t = 0; t < chooser.count(); t++) {
-		res = getFileExt(chooser.filename(t));
-		cout << res;
-		loadimage(*img, (string)chooser.filename(t), res);
+		loadimage(*img, (string)chooser.filename(t), (string)getFileExt(chooser.filename(t)));
 	}
 	sliderrow->maximum(numImages);
 	slidercol->maximum(numImages);

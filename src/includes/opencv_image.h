@@ -68,6 +68,7 @@ public:
 };
 
 void showCVImage();
+void reconstructAlphaChannel(cv::Mat& img);
 void loadimage(Imagelist& imglist, string dirpath, string extension);
 Mat stitchimages(Imagelist& imglist, int rows, int cols);
 std::vector<BYTE> readFile(const char* filename);
