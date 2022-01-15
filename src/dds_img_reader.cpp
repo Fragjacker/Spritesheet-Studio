@@ -34,7 +34,6 @@
   //
   // Use at your own risk!
   // ==========================================================
-
 #include <inttypes.h>
 #include <string.h>
 #include <stdlib.h>
@@ -556,8 +555,9 @@ inline std::vector<uint8_t> load_rgb(DDSURFACEDESC2& desc, IO& io) {
 
 	// read the file
 	int line = CalculateLine(width, bpp);
-	int filePitch = (desc.dwFlags & DDSD_PITCH) ? (int)desc.dwPitchOrLinearSize : line;
-	long delta = (long)filePitch - (long)line;
+	//int filePitch = (desc.dwFlags & DDSD_PITCH) ? (int)desc.dwPitchOrLinearSize : line;
+	//long delta = (long)filePitch - (long)line;
+	long delta = (int)desc.dwWidth * 4 - width * 4;
 	for (int i = 0; i < height; i++) {
 		BYTE* pixels = &result[line * i];
 		io.read(pixels, line);
@@ -567,16 +567,6 @@ inline std::vector<uint8_t> load_rgb(DDSURFACEDESC2& desc, IO& io) {
 			pixels += bytespp;
 		}
 	}
-
-	// enable transparency
-	//FreeImage_SetTransparent (dib, (desc.ddpfPixelFormat.dwFlags & DDPF_ALPHAPIXELS) ? TRUE : FALSE);
-
-	//if (!(desc.ddpfPixelFormat.dwFlags & DDPF_ALPHAPIXELS) && bpp == 32) {
-	//	// no transparency: convert to 24-bit
-	//	FIBITMAP *old = dib;
-	//	dib = FreeImage_ConvertTo24Bits (old);
-	//	FreeImage_Unload (old);
-	//}
 	return result;
 }
 
