@@ -8,6 +8,12 @@ using namespace std;
 class Imagelist;
 class Imagecells;
 
+enum alpha_mode
+{
+	DDSRGB = 0,
+	DDSDXT = 1
+};
+
 class Imagelist {
 private:
 	list<Mat> imglist;
@@ -68,7 +74,7 @@ public:
 };
 
 void showCVImage();
-void reconstructAlphaChannel(cv::Mat& img);
+void reconstructAlphaChannel(cv::Mat& img, alpha_mode mode);
 void loadimage(Imagelist& imglist, string dirpath, string extension);
 Mat stitchimages(Imagelist& imglist, int rows, int cols);
 std::vector<BYTE> readFile(const char* filename);

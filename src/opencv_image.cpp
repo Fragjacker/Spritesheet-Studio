@@ -44,14 +44,29 @@ std::vector<BYTE> readFile(const char* filename)
 /// Reconstructs the alpha channel from a 8.8.8.8 DDS image since OpenCV is weird with alpha channels.
 /// </summary>
 /// <param name="img"></param>
-void reconstructAlphaChannel(cv::Mat& img)
+void reconstructAlphaChannel(cv::Mat& img, alpha_mode mode)
 {
 	Mat channels[4];
 	split(img, channels);
 	Mat alpha = channels[3];
 	cvtColor(img, img, COLOR_BGRA2RGB);
-	Mat newchan[] = { channels[2], channels[1], channels[0], alpha };
-	merge(newchan, 4, img);
+	switch (mode)
+	{
+	case DDSRGB:
+	{
+		Mat newchan[] = { channels[2], channels[1], channels[0], alpha };
+		merge(newchan, 4, img);
+	}
+	break;
+	case DDSDXT:
+	{
+		Mat newchan[] = { channels[0], channels[1], channels[2], alpha };
+		merge(newchan, 4, img);
+	}
+	break;
+	default:
+		break;
+	}
 }
 
 // Loads a single image from a given path and adds it to the Imagelist obj.
@@ -66,7 +81,7 @@ void loadimage(Imagelist& imglist, string dirpath, string extension) {
 		{
 		case 0:
 			img = Mat(dds_img.height, dds_img.width, CV_8UC4, dds_img.data.data());
-			reconstructAlphaChannel(img);
+			reconstructAlphaChannel(img, DDSDXT);
 			break;
 		case 24:
 			img = Mat(dds_img.height, dds_img.width, CV_8UC3, dds_img.data.data());
@@ -75,9 +90,9 @@ void loadimage(Imagelist& imglist, string dirpath, string extension) {
 		case 32:
 		{
 			img = Mat(dds_img.height, dds_img.width, CV_8UC4, dds_img.data.data());
-			reconstructAlphaChannel(img);
+			reconstructAlphaChannel(img, DDSRGB);
 		}
-			break;
+		break;
 		default:
 			break;
 		}
