@@ -571,7 +571,7 @@ inline std::vector<uint8_t> load_rgb(DDSURFACEDESC2& desc, IO& io) {
 }
 
 template <class DECODER> static void
-load_dxt_helper(IO& io, std::vector<uint8_t>& result, int width, int height, int line) {
+load_dxt_helper(IO& io, std::vector<uint8_t>& result, int width, int height, int line, int pitchoffset) {
 	typedef typename DECODER::INFO INFO;
 	typedef typename INFO::Block Block;
 
@@ -585,6 +585,7 @@ load_dxt_helper(IO& io, std::vector<uint8_t>& result, int width, int height, int
 	if (height >= 4) {
 		for (; y < height; y += 4) {
 			io.read(input_buffer, sizeof(typename INFO::Block) * inputLine);
+			io.idx += pitchoffset;
 			// TODO: probably need some endian work here
 			BYTE* pbSrc = (BYTE*)input_buffer;
 			BYTE* pbDst = &result[width * 4 * (height - y - 1)];
@@ -603,6 +604,7 @@ load_dxt_helper(IO& io, std::vector<uint8_t>& result, int width, int height, int
 	}
 	if (heightRest) {
 		io.read(input_buffer, sizeof(typename INFO::Block) * inputLine);
+		io.idx += pitchoffset;
 		// TODO: probably need some endian work here
 		BYTE* pbSrc = (BYTE*)input_buffer;
 		BYTE* pbDst = &result[line * y];
@@ -636,13 +638,13 @@ inline std::vector<uint8_t> load_dxt(int type, DDSURFACEDESC2& desc, IO& io) {
 	// select the right decoder
 	switch (type) {
 	case 1:
-		load_dxt_helper <DXT_BLOCKDECODER_1>(io, result, width, height, line);
+		load_dxt_helper <DXT_BLOCKDECODER_1>(io, result, width, height, line, 8);
 		break;
 	case 3:
-		load_dxt_helper <DXT_BLOCKDECODER_3>(io, result, width, height, line);
+		load_dxt_helper <DXT_BLOCKDECODER_3>(io, result, width, height, line, 16);
 		break;
 	case 5:
-		load_dxt_helper <DXT_BLOCKDECODER_5>(io, result, width, height, line);
+		load_dxt_helper <DXT_BLOCKDECODER_5>(io, result, width, height, line, 16);
 		break;
 	}
 	// but now the lines are fucked! lets hack it correct
