@@ -29,16 +29,17 @@ const char* G_filterlist = "Portable network graphics\t*.png\n"
 void PreLoadImages(Fl_Native_File_Chooser& chooser) {
 	delete img;
 	img = new Imagelist();
-	int numImages = chooser.count();
-	int loadresult = 0;
-	string badImgs = "";
+	int num_images = chooser.count();
+	int loadresult = 0, num_bad_imgs = 0;
+	string bad_img_names = "";
 	bool errImg = false;
 	for (int t = 0; t < chooser.count(); t++) {
 		loadresult = loadimage(*img, (string)chooser.filename(t), (string)getFileExt(chooser.filename(t)));
 		// Show messagebox when there's an image with not matching size
 		if (loadresult == 1)
 		{
-			badImgs += (string)chooser.filename(t) + "\n";
+			bad_img_names += (string)chooser.filename(t) + "\n";
+			num_bad_imgs += 1;
 			errImg = true;
 		}
 	}
@@ -48,15 +49,16 @@ void PreLoadImages(Fl_Native_File_Chooser& chooser) {
 		fl_message(errorstring.c_str());
 
 		ofstream out("error_images.txt");
-		out << "Files with non-matching image sizes listed below:\n\n" << badImgs;
+		out << "Files with non-matching image sizes listed below:\n\n" << bad_img_names;
 		out.close();
 	}
-
-	sliderrow->maximum(numImages);
-	slidercol->maximum(numImages);
-	sliderrow->value(std::ceil(std::sqrt(numImages)));
-	slidercol->value(std::ceil(std::sqrt(numImages)));
-	G_filename->value(std::to_string(numImages).c_str());
+	resetColsAndRows();
+	int total_imgs = num_images - num_bad_imgs;
+	sliderrow->maximum(total_imgs);
+	slidercol->maximum(total_imgs);
+	sliderrow->value(std::ceil(std::sqrt(total_imgs)));
+	slidercol->value(std::ceil(std::sqrt(total_imgs)));
+	G_filename->value(std::to_string(total_imgs).c_str());
 	slidercol->activate();
 	sliderrow->activate();
 	butsave->activate();

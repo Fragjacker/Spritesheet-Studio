@@ -3,8 +3,8 @@
 #include "includes/dds_img_reader.h"
 #include <opencv2/core/opengl.hpp>
 // Global
+int last_col = 0, last_row = 0;
 
-Mat src;
 void showCVImage() {
 	Mat image;
 	image = imread("testimage.png", IMREAD_UNCHANGED);
@@ -73,7 +73,6 @@ void reconstructAlphaChannel(cv::Mat& img, alpha_mode mode)
 // Loads a single image from a given path and adds it to the Imagelist obj.
 int loadimage(Imagelist& imglist, string dirpath, string extension) {
 	Mat img;
-	static int last_col, last_row;
 	// Handle the case of 16 bits per channel unsigned images.
 	if (extension.compare("dds") == 0)
 	{
@@ -115,12 +114,12 @@ int loadimage(Imagelist& imglist, string dirpath, string extension) {
 		}
 		cvtColor(img, img, COLOR_BGR2BGRA);
 	}
-	// Lambda expression to initialize the last row/col with values once.
-	static bool once = [&]() {
+	// Bad image dimension handling
+	if (last_col == 0 && last_row == 0)
+	{
 		last_col = img.cols;
 		last_row = img.rows;
-		return true;
-	} ();
+	}
 	if (img.cols == last_col && img.rows == last_row)
 	{
 		imglist.addimage(img);
@@ -130,30 +129,41 @@ int loadimage(Imagelist& imglist, string dirpath, string extension) {
 	{
 		return 1;
 	}
-};
+}
+
+/// <summary>
+/// Resets the global variables back to zero once we finished reading all selected images, getting ready for the next batch.
+/// </summary>
+void resetColsAndRows()
+{
+	last_col = 0;
+	last_row = 0;
+}
 
 // Stitch all images together that exist in the Imagelist obj.
 Mat stitchimages(Imagelist& imglist, int rows, int cols) {
 	Mat temp_img, new_img;
 	list<Mat> worklist = imglist.getList();
 	worklist.reverse();
-	ImageCells* cells = new ImageCells(rows, cols, worklist.begin()->cols, worklist.begin()->rows);
+	ImageCells cells = ImageCells(rows, cols, worklist.begin()->cols, worklist.begin()->rows);
 	list<Mat>::iterator it = worklist.begin();
-	for (int j = 0; j < cells->getrows(); ++j)
+	for (int j = 0; j < cells.getrows(); ++j)
 	{
-		for (int i = 0; i < cells->getcols(); ++i)
+		for (int i = 0; i < cells.getcols(); ++i)
 		{
 			if (it != worklist.end())
 			{
-				cells->setCell(i, j, *it);
+				cells.setCell(i, j, *it);
 				++it;
 			}
 			else break;
 		}
 	}
-	imshow("cells.image", cells->getImage());
-	imwrite("spritesheet.png", cells->getImage());
+	imshow("cells.image", cells.getImage());
+	vector<int> compression_params;
+	compression_params.push_back(IMWRITE_PNG_COMPRESSION);
+	compression_params.push_back(9);
+	imwrite("spritesheet.png", cells.getImage(), compression_params);
 	waitKey();
-	delete cells;
 	return temp_img;
 }
