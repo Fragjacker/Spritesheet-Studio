@@ -2,6 +2,9 @@
 #include "includes/opencv_image.h"
 
 // GLOBALS
+Fl_Color colorbg = fl_rgb_color(60, 60, 60);
+Fl_Color colorbut = fl_rgb_color(90, 90, 90);
+Fl_Color colortext = fl_rgb_color(180, 180, 180);
 Fl_Hor_Value_Slider* sliderrow = NULL;
 Fl_Hor_Value_Slider* slidercol = NULL;
 Fl_Output* G_filename = NULL;
@@ -9,21 +12,46 @@ Fl_Button* butsave = NULL;
 Imagelist* img = NULL;
 const char* G_appname = "Spritesheet-Studio";
 const char* G_filterlist = "Portable network graphics\t*.png\n"
-"DirectDraw Surface Image\t*.dds\n"
-"Windows bitmap\t*.bmp\n"
-"Portable image formats\t*.{pbm,pgm,ppm}\n"
-"Sunraster\t*.{sr,ras}\n"
-"JPEG\t*.{jpeg,jpg,jpe}\n"
-"JPEG 2000\t*.jp2\n"
-"TIFF\t*.{tiff,tif}";
+"DirectDraw Surface Image\t*.dds";
+//const char* G_filterlist = "Portable network graphics\t*.png\n"
+//"DirectDraw Surface Image\t*.dds\n"
+//"Windows bitmap\t*.bmp\n"
+//"Portable image formats\t*.{pbm,pgm,ppm}\n"
+//"Sunraster\t*.{sr,ras}\n"
+//"JPEG\t*.{jpeg,jpg,jpe}\n"
+//"JPEG 2000\t*.jp2\n"
+//"TIFF\t*.{tiff,tif}";
 
+/// <summary>
+/// Loads the files, selected by the user and stores them into a list for later processing.
+/// </summary>
+/// <param name="chooser"></param>
 void PreLoadImages(Fl_Native_File_Chooser& chooser) {
 	delete img;
 	img = new Imagelist();
 	int numImages = chooser.count();
+	int loadresult = 0;
+	string badImgs = "";
+	bool errImg = false;
 	for (int t = 0; t < chooser.count(); t++) {
-		loadimage(*img, (string)chooser.filename(t), (string)getFileExt(chooser.filename(t)));
+		loadresult = loadimage(*img, (string)chooser.filename(t), (string)getFileExt(chooser.filename(t)));
+		// Show messagebox when there's an image with not matching size
+		if (loadresult == 1)
+		{
+			badImgs += (string)chooser.filename(t) + "\n";
+			errImg = true;
+		}
 	}
+	if (errImg)
+	{
+		string errorstring = "At least one or more images were found with sizes, that didn't match with the first loaded image, please check the ''error_images.txt'' file which lists the offending images!\n\nThe offending images had been skipped.";
+		fl_message(errorstring.c_str());
+
+		ofstream out("error_images.txt");
+		out << "Files with non-matching image sizes listed below:\n\n" << badImgs;
+		out.close();
+	}
+
 	sliderrow->maximum(numImages);
 	slidercol->maximum(numImages);
 	sliderrow->value(std::ceil(std::sqrt(numImages)));
@@ -32,12 +60,11 @@ void PreLoadImages(Fl_Native_File_Chooser& chooser) {
 	slidercol->activate();
 	sliderrow->activate();
 	butsave->activate();
-};
+}
 
 void ComputeSpritesheet(Fl_Widget*, void*) {
 	stitchimages(*img, sliderrow->value(), slidercol->value());
 };
-
 
 std::string getFileExt(const char* c) {
 	string s = c;
@@ -109,10 +136,6 @@ void setupGUI(int argc, char** argv) {
 	if (argc > argn && strncmp(argv[1], "-psn_", 5) == 0)
 		argn++;
 #endif
-	Fl_Color colorbg = fl_rgb_color(60, 60, 60);
-	Fl_Color colorbut = fl_rgb_color(90, 90, 90);
-	Fl_Color colortext = fl_rgb_color(180, 180, 180);
-
 	Fl_Window* win = new Fl_Window(640, 400, G_appname);
 	win->size_range(win->w(), win->h(), 0, 0);
 	win->color(colorbg);

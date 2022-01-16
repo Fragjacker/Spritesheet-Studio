@@ -1,4 +1,6 @@
 #include <string>		/* strstr() */
+#include <iostream>
+#include <fstream>
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Button.H>
@@ -8,6 +10,7 @@
 #include <FL/Fl_Native_File_Chooser.H>
 #include <FL/Fl_Help_View.H>
 #include <Fl/Fl_Hor_Value_Slider.H>
+#include <FL/fl_message.H>
 
 void PickFile_CB(Fl_Widget*, void*);
 void PickDir_CB(Fl_Widget*, void*);

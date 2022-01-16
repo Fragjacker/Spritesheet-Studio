@@ -1,3 +1,4 @@
+// This file was originally taken from https://github.com/juho-p/simple-dds-image-reader then modifier by FragJacker.
 #include "includes/opencv_image.h"
 #include "includes/dds_img_reader.h"
 #include <opencv2/core/opengl.hpp>
@@ -70,8 +71,9 @@ void reconstructAlphaChannel(cv::Mat& img, alpha_mode mode)
 }
 
 // Loads a single image from a given path and adds it to the Imagelist obj.
-void loadimage(Imagelist& imglist, string dirpath, string extension) {
+int loadimage(Imagelist& imglist, string dirpath, string extension) {
 	Mat img;
+	static int last_col, last_row;
 	// Handle the case of 16 bits per channel unsigned images.
 	if (extension.compare("dds") == 0)
 	{
@@ -113,7 +115,21 @@ void loadimage(Imagelist& imglist, string dirpath, string extension) {
 		}
 		cvtColor(img, img, COLOR_BGR2BGRA);
 	}
-	imglist.addimage(img);
+	// Lambda expression to initialize the last row/col with values once.
+	static bool once = [&]() {
+		last_col = img.cols;
+		last_row = img.rows;
+		return true;
+	} ();
+	if (img.cols == last_col && img.rows == last_row)
+	{
+		imglist.addimage(img);
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
 };
 
 // Stitch all images together that exist in the Imagelist obj.
@@ -136,7 +152,7 @@ Mat stitchimages(Imagelist& imglist, int rows, int cols) {
 		}
 	}
 	imshow("cells.image", cells->getImage());
-	imwrite("merged_image.png", cells->getImage());
+	imwrite("spritesheet.png", cells->getImage());
 	waitKey();
 	delete cells;
 	return temp_img;
