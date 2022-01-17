@@ -1,4 +1,5 @@
 #include "includes/file_IO.h"
+#include "includes/Fl_OpenCV.h"
 #include "includes/opencv_image.h"
 
 // GLOBALS
@@ -9,7 +10,9 @@ Fl_Hor_Value_Slider* sliderrow = NULL;
 Fl_Hor_Value_Slider* slidercol = NULL;
 Fl_Output* G_filename = NULL;
 Fl_Button* butsave = NULL;
+Fl_OpenCV* stitchResultView = NULL;
 Imagelist* img = NULL;
+Mat* m = NULL, * m_temp = NULL;
 const char* G_appname = "Spritesheet-Studio";
 const char* G_filterlist = "Portable network graphics\t*.png\n"
 "DirectDraw Surface Image\t*.dds";
@@ -53,6 +56,12 @@ void PreLoadImages(Fl_Native_File_Chooser& chooser) {
 		out.close();
 	}
 	resetColsAndRows();
+	setupUserInputs(num_images, num_bad_imgs);
+	updateSpritePreview();
+}
+
+void setupUserInputs(int num_images, int num_bad_imgs)
+{
 	int total_imgs = num_images - num_bad_imgs;
 	sliderrow->maximum(total_imgs);
 	slidercol->maximum(total_imgs);
@@ -64,9 +73,37 @@ void PreLoadImages(Fl_Native_File_Chooser& chooser) {
 	butsave->activate();
 }
 
+/// <summary>
+/// Event function to call the preview generator for the final image.
+/// </summary>
+/// <param name=""></param>
+/// <param name=""></param>
 void ComputeSpritesheet(Fl_Widget*, void*) {
-	stitchimages(*img, sliderrow->value(), slidercol->value());
-};
+	updateSpritePreview();
+}
+/// <summary>
+/// Retrieves the Spritesheet preview image and shows it in the window as a preview.
+/// </summary>
+void updateSpritePreview() {
+	m = stitchimages(*img, (int)sliderrow->value(), (int)slidercol->value());
+	m_temp = new Mat(*m);
+	resize(*m_temp, *m_temp, Size(stitchResultView->w(), stitchResultView->h()), 0, 0, INTER_CUBIC);
+	stitchResultView->SetImage(m_temp);
+}
+
+/// <summary>
+/// Callback function to happen when pressing the save spritesheet button.
+/// </summary>
+/// <param name=""></param>
+/// <param name=""></param>
+void saveSpriteSheet(Fl_Widget*, void*) {
+	//Setup writing the file
+	vector<int> compression_params;
+	compression_params.push_back(IMWRITE_PNG_COMPRESSION);
+	compression_params.push_back(9);
+	imwrite("spritesheet.png", *m, compression_params);
+	delete m, m_temp;
+}
 
 std::string getFileExt(const char* c) {
 	string s = c;
@@ -138,14 +175,28 @@ void setupGUI(int argc, char** argv) {
 	if (argc > argn && strncmp(argv[1], "-psn_", 5) == 0)
 		argn++;
 #endif
-	Fl_Window* win = new Fl_Window(640, 400, G_appname);
+	Fl_Window* win = new Fl_Window(800, 900, G_appname);
 	win->size_range(win->w(), win->h(), 0, 0);
 	win->color(colorbg);
 	win->begin();
 	{
 		int x = 10, y = 10;
 
-		G_filename = new Fl_Output(x + 70, y, 50, 25, "Num Files:");
+
+		// FileIO buttons
+		Fl_Button* butdir = new Fl_Button(x , y, 80, 25, "Pick Dir");
+		butdir->callback(PickDir_CB);
+		butdir->box(FL_FLAT_BOX);
+		butdir->color(colorbut);
+		butdir->labelcolor(colortext);
+
+		Fl_Button* but = new Fl_Button(butdir->x() + x + butdir->w(), y, 80, 25, "Pick Files");
+		but->callback(PickFile_CB);
+		but->box(FL_FLAT_BOX);
+		but->color(colorbut);
+		but->labelcolor(colortext);
+
+		G_filename = new Fl_Output(but->x() + x + butdir->w() + 80, y, 50, 25, "Num Files:");
 		G_filename->box(FL_FLAT_BOX);
 		G_filename->color(colorbut);
 		G_filename->value("");
@@ -153,26 +204,13 @@ void setupGUI(int argc, char** argv) {
 		G_filename->textcolor(colortext);
 		G_filename->labelcolor(colortext);
 
-		// FileIO buttons
-		Fl_Button* but = new Fl_Button(win->w() - x - 80, y, 80, 25, "Pick File");
-		but->callback(PickFile_CB);
-		but->box(FL_FLAT_BOX);
-		but->color(colorbut);
-		but->labelcolor(colortext);
-
-		Fl_Button* butdir = new Fl_Button(but->x() - x - but->w(), y, 80, 25, "Pick Dir");
-		butdir->callback(PickDir_CB);
-		butdir->box(FL_FLAT_BOX);
-		butdir->color(colorbut);
-		butdir->labelcolor(colortext);
-
-
-		butsave = new Fl_Button(win->w() - x - 140, win->h() - 25 - 10, 140, 25, "Save Spritesheet..");
+		butsave = new Fl_Button(win->w() - x - 140, y, 140, 25, "Save Spritesheet..");
 		butsave->callback(ComputeSpritesheet);
 		butsave->box(FL_FLAT_BOX);
 		butsave->color(colorbut);
 		butsave->labelcolor(colortext);
 		butsave->deactivate();
+		butsave->callback(saveSpriteSheet);
 
 		// Column and Row sliders
 		y += G_filename->h() + 20;
@@ -185,6 +223,7 @@ void setupGUI(int argc, char** argv) {
 		slidercol->color(colorbut);
 		slidercol->textcolor(colortext);
 		slidercol->labelcolor(colortext);
+		slidercol->callback(ComputeSpritesheet);
 
 		sliderrow = new Fl_Hor_Value_Slider(x + slidercol->w() + 20, y, (win->w() / 2) - x - 20, 20, "Number of Rows");
 		sliderrow->step(1);
@@ -195,31 +234,41 @@ void setupGUI(int argc, char** argv) {
 		sliderrow->color(colorbut);
 		sliderrow->textcolor(colortext);
 		sliderrow->labelcolor(colortext);
+		sliderrow->callback(ComputeSpritesheet);
 
 
-		y += slidercol->h() + 50;
-		Fl_Help_View* view = new Fl_Help_View(x, y, win->w() * 0.8, 200);
-		view->box(FL_FLAT_BOX);
-		view->color(win->color());
-#define TAB "&lt;Tab&gt;"
-		view->textfont(FL_HELVETICA);
-		view->textsize(10);
-		view->textcolor(colortext);
-		view->value("The Filter can be one or more filter patterns, one per line.\n"
-			"Patterns can be:<ul>\n"
-			"  <li>A single wildcard (e.g. <tt>\"*.txt\"</tt>)</li>\n"
-			"  <li>Multiple wildcards (e.g. <tt>\"*.{cxx,h,H}\"</tt>)</li>\n"
-			"  <li>A descriptive name followed by a " TAB " and a wildcard (e.g. <tt>\"Text Files" TAB "*.txt\"</tt>)</li>\n"
-			"</ul>\n"
-			"In the above \"Filter\" field, you can use <b><font color=#55f face=Courier>Ctrl-I</font></b> to enter " TAB " characters as needed.<br>\n"
-			"Example:<pre>\n"
-			"\n"
-			"    Text<font color=#55f>&lt;Ctrl-I&gt;</font>*.txt\n"
-			"    C Files<font color=#55f>&lt;Ctrl-I&gt;</font>*.{cxx,h,c,cpp}\n"
-			"    Tars<font color=#55f>&lt;Ctrl-I&gt;</font>*.{tar,tar.gz}\n"
-			"    Apps<font color=#55f>&lt;Ctrl-I&gt;</font>*.app\n");
+		//		y += slidercol->h() + 50;
+		//		Fl_Help_View* view = new Fl_Help_View(x, y, win->w() * 0.8, 200);
+		//		view->box(FL_FLAT_BOX);
+		//		view->color(win->color());
+		//#define TAB "&lt;Tab&gt;"
+		//		view->textfont(FL_HELVETICA);
+		//		view->textsize(10);
+		//		view->textcolor(colortext);
+		//		view->value("The Filter can be one or more filter patterns, one per line.\n"
+		//			"Patterns can be:<ul>\n"
+		//			"  <li>A single wildcard (e.g. <tt>\"*.txt\"</tt>)</li>\n"
+		//			"  <li>Multiple wildcards (e.g. <tt>\"*.{cxx,h,H}\"</tt>)</li>\n"
+		//			"  <li>A descriptive name followed by a " TAB " and a wildcard (e.g. <tt>\"Text Files" TAB "*.txt\"</tt>)</li>\n"
+		//			"</ul>\n"
+		//			"In the above \"Filter\" field, you can use <b><font color=#55f face=Courier>Ctrl-I</font></b> to enter " TAB " characters as needed.<br>\n"
+		//			"Example:<pre>\n"
+		//			"\n"
+		//			"    Text<font color=#55f>&lt;Ctrl-I&gt;</font>*.txt\n"
+		//			"    C Files<font color=#55f>&lt;Ctrl-I&gt;</font>*.{cxx,h,c,cpp}\n"
+		//			"    Tars<font color=#55f>&lt;Ctrl-I&gt;</font>*.{tar,tar.gz}\n"
+		//			"    Apps<font color=#55f>&lt;Ctrl-I&gt;</font>*.app\n");
 
-		//win->resizable(G_filename);
+		y += sliderrow->h() + 50;
+		Fl_Group* grp = new Fl_Group(x, y, win->w() * 0.97, win->h() * 0.85);
+		stitchResultView = new Fl_OpenCV(x, y, win->w() * 0.97, win->h() * 0.85);
+		grp->resizable(stitchResultView);
+		grp->color(fl_rgb_color(20, 20, 20));
+		grp->box(FL_FLAT_BOX);
+		grp->labelcolor(colortext);
+		grp->label("Image preview");
+		grp->end();
+		win->resizable(grp);
 	}
 	win->end();
 	win->show(argc, argv);

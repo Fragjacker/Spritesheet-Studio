@@ -141,8 +141,8 @@ void resetColsAndRows()
 }
 
 // Stitch all images together that exist in the Imagelist obj.
-Mat stitchimages(Imagelist& imglist, int rows, int cols) {
-	Mat temp_img, new_img;
+Mat* stitchimages(Imagelist& imglist, int rows, int cols) {
+	Mat* result;
 	list<Mat> worklist = imglist.getList();
 	worklist.reverse();
 	ImageCells cells = ImageCells(rows, cols, worklist.begin()->cols, worklist.begin()->rows);
@@ -159,11 +159,12 @@ Mat stitchimages(Imagelist& imglist, int rows, int cols) {
 			else break;
 		}
 	}
-	imshow("cells.image", cells.getImage());
-	vector<int> compression_params;
-	compression_params.push_back(IMWRITE_PNG_COMPRESSION);
-	compression_params.push_back(9);
-	imwrite("spritesheet.png", cells.getImage(), compression_params);
-	waitKey();
-	return temp_img;
+	//imshow("cells.image", temp_img);
+	//vector<int> compression_params;
+	//compression_params.push_back(IMWRITE_PNG_COMPRESSION);
+	//compression_params.push_back(9);
+	//imwrite("spritesheet.png", temp_img, compression_params);
+	//waitKey();
+	result = new Mat(*cells.getImage());
+	return result;
 }

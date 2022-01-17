@@ -68,14 +68,19 @@ public:
 			img.copyTo(image);
 	}
 
-	Mat getImage() {
-		return image;
+	Mat * getImage() {
+		return &image;
 	}
 };
 
 void showCVImage();
+
 void reconstructAlphaChannel(cv::Mat& img, alpha_mode mode);
+
 int loadimage(Imagelist& imglist, string dirpath, string extension);
+
 void resetColsAndRows();
-Mat stitchimages(Imagelist& imglist, int rows, int cols);
+
+Mat * stitchimages(Imagelist& imglist, int rows, int cols);
+
 std::vector<BYTE> readFile(const char* filename);

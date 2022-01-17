@@ -5,8 +5,6 @@ project(Spritesheet-Studio_core LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set( APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/resources/icon.rc" )
-
 set(OpenCV_STATIC 1)
 set(FLTK_STATIC 1)
 
@@ -17,6 +15,7 @@ set(SRCS
     main.cpp 
     opencv_image.cpp
     dds_img_reader.cpp
+    Fl_OpenCV.cpp
     file_IO.cpp)
 
 include(${FLTK_USE_FILE})
@@ -35,7 +34,7 @@ else()
     # the WIN32 is needed for Windows in order for it to look for WinMain
     # instead of the main function. This is ignored on other systems,
     # so it works on all platforms
+    set( APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/resources/icon.rc" )
     add_executable(${PROJECT_NAME} WIN32 ${SRCS} ${APP_ICON_RESOURCE_WINDOWS})
 endif()
 target_link_libraries(${PROJECT_NAME} PUBLIC ${OpenCV_LIBS} fltk)
-#target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR} ${EXTRA_INCLUDES})

@@ -13,8 +13,17 @@
 #include <FL/fl_message.H>
 
 void PickFile_CB(Fl_Widget*, void*);
+
 void PickDir_CB(Fl_Widget*, void*);
+
 void ComputeSpritesheet(Fl_Widget*, void*);
+
+void updateSpritePreview();
+
 std::string getFileExt(const char* c);
+
 void setupGUI(int argc, char** argv);
+
 void PreLoadImages(Fl_Native_File_Chooser& chooser);
+
+void setupUserInputs(int num_images, int num_bad_imgs);
