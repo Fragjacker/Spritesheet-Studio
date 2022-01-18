@@ -13,6 +13,7 @@ Fl_Button* butsave = NULL;
 Fl_OpenCV* stitchResultView = NULL;
 Imagelist* img = NULL;
 Mat* m = NULL, * m_temp = NULL;
+int total_imgs = 0;
 const char* G_appname = "Spritesheet-Studio";
 const char* G_filterlist = "Portable network graphics\t*.png\n"
 "DirectDraw Surface Image\t*.dds";
@@ -62,7 +63,7 @@ void PreLoadImages(Fl_Native_File_Chooser& chooser) {
 
 void setupUserInputs(int num_images, int num_bad_imgs)
 {
-	int total_imgs = num_images - num_bad_imgs;
+	total_imgs = num_images - num_bad_imgs;
 	sliderrow->maximum(total_imgs);
 	slidercol->maximum(total_imgs);
 	sliderrow->value(std::ceil(std::sqrt(total_imgs)));
@@ -86,6 +87,7 @@ void ComputeSpritesheet(Fl_Widget*, void*) {
 /// </summary>
 void updateSpritePreview() {
 	m = stitchimages(*img, (int)sliderrow->value(), (int)slidercol->value());
+	delete m_temp;
 	m_temp = new Mat(*m);
 	resize(*m_temp, *m_temp, Size(stitchResultView->w(), stitchResultView->h()), 0, 0, INTER_CUBIC);
 	stitchResultView->SetImage(m_temp);
@@ -184,22 +186,22 @@ void setupGUI(int argc, char** argv) {
 
 
 		// FileIO buttons
-		Fl_Button* butdir = new Fl_Button(x , y, 80, 25, "Pick Dir");
-		butdir->callback(PickDir_CB);
-		butdir->box(FL_FLAT_BOX);
-		butdir->color(colorbut);
-		butdir->labelcolor(colortext);
-
-		Fl_Button* but = new Fl_Button(butdir->x() + x + butdir->w(), y, 80, 25, "Pick Files");
+		Fl_Button* but = new Fl_Button( x, y, 90, 25, "Pick Files...");
 		but->callback(PickFile_CB);
 		but->box(FL_FLAT_BOX);
 		but->color(colorbut);
 		but->labelcolor(colortext);
 
-		G_filename = new Fl_Output(but->x() + x + butdir->w() + 80, y, 50, 25, "Num Files:");
+		//Fl_Button* butdir = new Fl_Button(but->x() + x + but->w(), y, 80, 25, "Pick Dir");
+		//butdir->callback(PickDir_CB);
+		//butdir->box(FL_FLAT_BOX);
+		//butdir->color(colorbut);
+		//butdir->labelcolor(colortext);
+
+		G_filename = new Fl_Output(but->x() + x + but->w() + 90, y, 50, 25, "Loaded Files:");
 		G_filename->box(FL_FLAT_BOX);
 		G_filename->color(colorbut);
-		G_filename->value("");
+		G_filename->value("0");
 		G_filename->tooltip("Default filename");
 		G_filename->textcolor(colortext);
 		G_filename->labelcolor(colortext);
@@ -266,7 +268,7 @@ void setupGUI(int argc, char** argv) {
 		grp->color(fl_rgb_color(20, 20, 20));
 		grp->box(FL_FLAT_BOX);
 		grp->labelcolor(colortext);
-		grp->label("Image preview");
+		grp->label("Image preview\n(Preview stretches to fill the window, final image is unstretched)");
 		grp->end();
 		win->resizable(grp);
 	}
