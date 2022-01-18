@@ -10,18 +10,7 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "variables": [
-        {
-          "name": "OpenCV_DIR",
-          "value": "D:/OpenCV/build_opencv",
-          "type": "PATH"
-        },
-        {
-          "name": "wxWidgets_ROOT_DIR",
-          "value": "D:/wxWidgets/wxWidgets",
-          "type": "PATH"
-        }
-      ]
+      "intelliSenseMode": "windows-clang-x64"
     },
     {
       "name": "x64-Release",
@@ -29,25 +18,10 @@
       "configurationType": "Release",
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
+      "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x64_x64" ],
-      "variables": [
-        {
-          "name": "OpenCV_DIR",
-          "value": "D:/OpenCV/build_opencv",
-          "type": "PATH"
-        },
-        {
-          "name": "wxWidgets_LIB_DIR",
-          "value": "D:/wxWidgets/wxWidgets/lib",
-          "type": "PATH"
-        },
-        {
-          "name": "wxWidgets_ROOT_DIR",
-          "value": "D:/wxWidgets/wxWidgets",
-          "type": "PATH"
-        }
-      ]
+      "intelliSenseMode": "windows-clang-x64"
     }
   ]
 }
