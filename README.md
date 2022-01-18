@@ -25,3 +25,6 @@ Clone this repository, then open a command prompt and `cd` into the repository. 
 - Git
 
 Clone this repository, then open a command prompt and `cd` into the repository. Once there invoke Cmake there to start building the project. (Untested)
+
+# Tags
+spritesheet,studio,tool,png,dds,c++,app,cmake,windows,linux,macos
