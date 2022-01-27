@@ -12,7 +12,8 @@ Fl_Output* G_filename = NULL;
 Fl_Button* butsave = NULL;
 Fl_OpenCV* stitchResultView = NULL;
 Imagelist* img = NULL;
-Mat* m = NULL, * m_temp = NULL;
+list<Mat>* m = NULL;
+Mat* m_temp = NULL;
 int total_imgs = 0;
 const char* G_appname = "Spritesheet-Studio";
 const char* G_filterlist = "Portable network graphics\t*.png\n"
@@ -86,9 +87,9 @@ void ComputeSpritesheet(Fl_Widget*, void*) {
 /// Retrieves the Spritesheet preview image and shows it in the window as a preview.
 /// </summary>
 void updateSpritePreview() {
-	m = stitchimages(*img, (int)sliderrow->value(), (int)slidercol->value());
+	m = stitchimages(*img, (int)sliderrow->value(), (int)slidercol->value(), 2);
 	delete m_temp;
-	m_temp = new Mat(*m);
+	m_temp = new Mat(*m->begin());
 	resize(*m_temp, *m_temp, Size(stitchResultView->w(), stitchResultView->h()), 0, 0, INTER_CUBIC);
 	stitchResultView->SetImage(m_temp);
 }
@@ -103,7 +104,13 @@ void saveSpriteSheet(Fl_Widget*, void*) {
 	vector<int> compression_params;
 	compression_params.push_back(IMWRITE_PNG_COMPRESSION);
 	compression_params.push_back(9);
-	imwrite("spritesheet.png", *m, compression_params);
+	int index = 0;
+	for (list<Mat>::iterator i = m->begin(); i != m->end(); i++)
+	{
+		index++;
+		string outstr = "spritesheet" + to_string(index) + ".png";
+		imwrite(outstr, *i, compression_params);
+	}
 	delete m, m_temp;
 }
 
@@ -186,7 +193,7 @@ void setupGUI(int argc, char** argv) {
 
 
 		// FileIO buttons
-		Fl_Button* but = new Fl_Button( x, y, 90, 25, "Pick Files...");
+		Fl_Button* but = new Fl_Button(x, y, 90, 25, "Pick Files...");
 		but->callback(PickFile_CB);
 		but->box(FL_FLAT_BOX);
 		but->color(colorbut);

@@ -81,6 +81,6 @@ int loadimage(Imagelist& imglist, string dirpath, string extension);
 
 void resetColsAndRows();
 
-Mat * stitchimages(Imagelist& imglist, int rows, int cols);
+list<Mat> * stitchimages(Imagelist& imglist, int rows, int cols, int subdiv = 1);
 
 std::vector<BYTE> readFile(const char* filename);

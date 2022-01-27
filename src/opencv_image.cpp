@@ -140,24 +140,37 @@ void resetColsAndRows()
 	last_row = 0;
 }
 
-// Stitch all images together that exist in the Imagelist obj.
-Mat* stitchimages(Imagelist& imglist, int rows, int cols) {
+/// <summary>
+/// Stitch all images together that exist in the Imagelist obj.
+/// </summary>
+/// <param name="imglist"></param>
+/// <param name="rows"></param>
+/// <param name="cols"></param>
+/// <param name="subdiv"></param>
+/// <returns></returns>
+list<Mat>* stitchimages(Imagelist& imglist, int rows, int cols, int subdiv) {
 	Mat* result;
 	list<Mat> worklist = imglist.getList();
+	list<Mat>* returnlist = new list<Mat>();
 	worklist.reverse();
-	ImageCells cells = ImageCells(rows, cols, worklist.begin()->cols, worklist.begin()->rows);
 	list<Mat>::iterator it = worklist.begin();
-	for (int j = 0; j < cells.getrows(); ++j)
+	int num_chunks = (subdiv < 2) ? 1 : 2;
+	for (size_t s = 0; s < subdiv * num_chunks; s++)
 	{
-		for (int i = 0; i < cells.getcols(); ++i)
+		ImageCells cells = ImageCells(rows / subdiv, cols / subdiv, worklist.begin()->cols, worklist.begin()->rows);
+		for (int j = 0; j < (cells.getrows()); ++j)
 		{
-			if (it != worklist.end())
+			for (int i = 0; i < (cells.getcols()); ++i)
 			{
-				cells.setCell(i, j, *it);
-				++it;
+				if (it != worklist.end())
+				{
+					cells.setCell(i, j, *it);
+					++it;
+				}
+				else break;
 			}
-			else break;
 		}
+		returnlist->push_front(*cells.getImage());
 	}
 	//imshow("cells.image", temp_img);
 	//vector<int> compression_params;
@@ -165,6 +178,5 @@ Mat* stitchimages(Imagelist& imglist, int rows, int cols) {
 	//compression_params.push_back(9);
 	//imwrite("spritesheet.png", temp_img, compression_params);
 	//waitKey();
-	result = new Mat(*cells.getImage());
-	return result;
+	return returnlist;
 }
