@@ -10,8 +10,10 @@ Fl_Hor_Value_Slider* sliderrow = NULL;
 Fl_Hor_Value_Slider* slidercol = NULL;
 Fl_Hor_Value_Slider* slidersplit = NULL;
 Fl_Output* G_filename = NULL;
+Fl_Input* f_input = NULL;
 Fl_Button* butsave = NULL;
 Fl_OpenCV* stitchResultView = NULL;
+Fl_Progress* progressbar = NULL;
 Imagelist* img = NULL;
 list<Mat>* m = NULL;
 Mat* m_temp = NULL;
@@ -38,7 +40,10 @@ void PreLoadImages(Fl_Native_File_Chooser& chooser) {
 	int loadresult = 0, num_bad_imgs = 0;
 	string bad_img_names = "";
 	bool errImg = false;
+	progressbar->maximum(chooser.count());
+	progressbar->label("Loading Files...");
 	for (int t = 0; t < chooser.count(); t++) {
+		setProgressbarValue(t+1);
 		loadresult = loadimage(*img, (string)chooser.filename(t), (string)getFileExt(chooser.filename(t)));
 		// Show messagebox when there's an image with not matching size
 		if (loadresult == 1)
@@ -57,9 +62,20 @@ void PreLoadImages(Fl_Native_File_Chooser& chooser) {
 		out << "Files with non-matching image sizes listed below:\n\n" << bad_img_names;
 		out.close();
 	}
+	progressbar->label("Completed!");
 	resetColsAndRows();
+	slidersplit->value(0);
 	setupUserInputs(num_images, num_bad_imgs);
 	updateSpritePreview();
+}
+
+/// <summary>
+/// Update the progress bar value and allocate some CPU to redraw it.
+/// </summary>
+/// <param name="value"></param>
+void setProgressbarValue(int value) {
+	progressbar->value(value);
+	Fl::check();
 }
 
 void setupUserInputs(int num_images, int num_bad_imgs)
@@ -107,12 +123,17 @@ void saveSpriteSheet(Fl_Widget*, void*) {
 	compression_params.push_back(IMWRITE_PNG_COMPRESSION);
 	compression_params.push_back(9);
 	int index = 0;
+	progressbar->maximum(m->size());
+	progressbar->label("Writing Files...");
+	setProgressbarValue(index);
 	for (list<Mat>::iterator i = m->begin(); i != m->end(); i++)
 	{
 		index++;
-		string outstr = "spritesheet" + to_string(index) + ".png";
+		string outstr = f_input->value() + to_string(index) + ".png";
 		imwrite(outstr, *i, compression_params);
+		setProgressbarValue(index);
 	}
+	progressbar->label("Completed!");
 	delete m, m_temp;
 }
 
@@ -215,6 +236,12 @@ void setupGUI(int argc, char** argv) {
 		G_filename->textcolor(colortext);
 		G_filename->labelcolor(colortext);
 
+		progressbar = new Fl_Progress(G_filename->x() + x + G_filename->w(), y, 150, 25, "");
+		progressbar->maximum(100);
+		progressbar->value(0);
+		progressbar->selection_color(FL_GREEN);
+		progressbar->color(colorbut);
+
 		butsave = new Fl_Button(win->w() - x - 140, y, 140, 25, "Save Spritesheet..");
 		butsave->callback(ComputeSpritesheet);
 		butsave->box(FL_FLAT_BOX);
@@ -222,6 +249,14 @@ void setupGUI(int argc, char** argv) {
 		butsave->labelcolor(colortext);
 		butsave->deactivate();
 		butsave->callback(saveSpriteSheet);
+
+		f_input = new Fl_Input(win->w() - x - butsave->w() - 160, y, 140, 25);
+		f_input->labelcolor(colortext);
+		f_input->label("Filename:");
+		f_input->box(FL_FLAT_BOX);
+		f_input->color(colorbut);
+		f_input->textcolor(colortext);
+		f_input->value("spritesheet");
 
 		// Column and Row sliders
 		y += G_filename->h() + 20;

@@ -154,7 +154,7 @@ list<Mat>* stitchimages(Imagelist& imglist, int rows, int cols, int subdiv) {
 	list<Mat>* returnlist = new list<Mat>();
 	worklist.reverse();
 	list<Mat>::iterator it = worklist.begin();
-	int num_chunks = (subdiv < 2) ? 1 : (subdiv * 2), num_slices = (subdiv < 2) ? 1 : subdiv;
+	int num_chunks = (subdiv < 2) ? 1 : (subdiv * subdiv), num_slices = (subdiv < 2) ? 1 : subdiv;
 	for (size_t s = 0; s < num_chunks; s++)
 	{
 		ImageCells cells = ImageCells(rows / num_slices, cols / num_slices, worklist.begin()->cols, worklist.begin()->rows);
