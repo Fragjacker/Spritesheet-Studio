@@ -65,7 +65,8 @@ void PreLoadImages(Fl_Native_File_Chooser& chooser) {
 	}
 	progressbar->label("Completed!");
 	resetColsAndRows();
-	slidersplit_h->value(0);
+	//slidersplit_h->value(0);
+	//slidersplit_w->value(0);
 	setupUserInputs(num_images, num_bad_imgs);
 	updateSpritePreview();
 }
@@ -155,43 +156,40 @@ void PickFile_CB(Fl_Widget*, void*) {
 	native.title("Pick multiple files");
 	native.type(Fl_Native_File_Chooser::BROWSE_MULTI_FILE);
 	native.filter(G_filterlist);
-	native.preset_file(G_filename->value());
+	//native.preset_file(G_filename->value());
 	// Show native chooser
 	switch (native.show()) {
 	case -1: fprintf(stderr, "ERROR: %s\n", native.errmsg()); break;	// ERROR
 	case  1: fprintf(stderr, "*** CANCEL\n"); break;		// CANCEL
 	default: 								// PICKED FILE
 		if (native.filename()) {
-			G_filename->value(native.filename());
+			//G_filename->value(native.filename());
 			PreLoadImages(native);
-		}
-		else {
-			G_filename->value("NULL");
 		}
 		break;
 	}
 }
 
-void PickDir_CB(Fl_Widget*, void*) {
-	// Create native chooser
-	Fl_Native_File_Chooser native;
-	native.title("Pick a Directory");
-	native.directory(G_filename->value());
-	native.type(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
-	// Show native chooser
-	switch (native.show()) {
-	case -1: fprintf(stderr, "ERROR: %s\n", native.errmsg()); break;	// ERROR
-	case  1: fprintf(stderr, "*** CANCEL\n"); break;		// CANCEL
-	default: 								// PICKED DIR
-		if (native.filename()) {
-			G_filename->value(native.filename());
-		}
-		else {
-			G_filename->value("NULL");
-		}
-		break;
-	}
-}
+//void PickDir_CB(Fl_Widget*, void*) {
+//	// Create native chooser
+//	Fl_Native_File_Chooser native;
+//	native.title("Pick a Directory");
+//	native.directory(G_filename->value());
+//	native.type(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
+//	// Show native chooser
+//	switch (native.show()) {
+//	case -1: fprintf(stderr, "ERROR: %s\n", native.errmsg()); break;	// ERROR
+//	case  1: fprintf(stderr, "*** CANCEL\n"); break;		// CANCEL
+//	default: 								// PICKED DIR
+//		if (native.filename()) {
+//			G_filename->value(native.filename());
+//		}
+//		else {
+//			G_filename->value("NULL");
+//		}
+//		break;
+//	}
+//}
 
 void setupGUI(int argc, char** argv) {
 	//// For a nicer looking browser under linux, call Fl_File_Icon::load_system_icons();

@@ -16,7 +16,7 @@
 
 void PickFile_CB(Fl_Widget*, void*);
 
-void PickDir_CB(Fl_Widget*, void*);
+//void PickDir_CB(Fl_Widget*, void*);
 
 void ComputeSpritesheet(Fl_Widget*, void*);
 

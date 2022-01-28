@@ -173,7 +173,7 @@ list<Mat>* stitchimages(Imagelist& imglist, int rows, int cols, int subdiv_w, in
 				else break;
 			}
 		}
-		returnlist->push_front(*cells.getImage());
+		returnlist->push_back(*cells.getImage());
 	}
 	//imshow("cells.image", temp_img);
 	//vector<int> compression_params;
