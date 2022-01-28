@@ -8,7 +8,8 @@ Fl_Color colorbut = fl_rgb_color(90, 90, 90);
 Fl_Color colortext = fl_rgb_color(180, 180, 180);
 Fl_Hor_Value_Slider* sliderrow = NULL;
 Fl_Hor_Value_Slider* slidercol = NULL;
-Fl_Hor_Value_Slider* slidersplit = NULL;
+Fl_Hor_Value_Slider* slidersplit_h = NULL;
+Fl_Hor_Value_Slider* slidersplit_w = NULL;
 Fl_Output* G_filename = NULL;
 Fl_Input* f_input = NULL;
 Fl_Button* butsave = NULL;
@@ -64,7 +65,7 @@ void PreLoadImages(Fl_Native_File_Chooser& chooser) {
 	}
 	progressbar->label("Completed!");
 	resetColsAndRows();
-	slidersplit->value(0);
+	slidersplit_h->value(0);
 	setupUserInputs(num_images, num_bad_imgs);
 	updateSpritePreview();
 }
@@ -83,13 +84,15 @@ void setupUserInputs(int num_images, int num_bad_imgs)
 	int total_imgs = num_images - num_bad_imgs, num_sqrt_imgs = std::ceil(std::sqrt(total_imgs));
 	sliderrow->maximum(total_imgs);
 	slidercol->maximum(total_imgs);
-	slidersplit->maximum(num_sqrt_imgs);
+	slidersplit_h->maximum(num_sqrt_imgs);
+	slidersplit_w->maximum(num_sqrt_imgs);
 	sliderrow->value(num_sqrt_imgs);
 	slidercol->value(num_sqrt_imgs);
 	G_filename->value(std::to_string(total_imgs).c_str());
 	slidercol->activate();
 	sliderrow->activate();
-	slidersplit->activate();
+	slidersplit_h->activate();
+	slidersplit_w->activate();
 	butsave->activate();
 }
 
@@ -105,7 +108,7 @@ void ComputeSpritesheet(Fl_Widget*, void*) {
 /// Retrieves the Spritesheet preview image and shows it in the window as a preview.
 /// </summary>
 void updateSpritePreview() {
-	m = stitchimages(*img, (int)sliderrow->value(), (int)slidercol->value(), (int)slidersplit->value());
+	m = stitchimages(*img, (int)sliderrow->value(), (int)slidercol->value(), (int)slidersplit_h->value(), (int)slidersplit_w->value());
 	delete m_temp;
 	m_temp = new Mat(*m->begin());
 	resize(*m_temp, *m_temp, Size(stitchResultView->w(), stitchResultView->h()), 0, 0, INTER_CUBIC);
@@ -283,16 +286,27 @@ void setupGUI(int argc, char** argv) {
 		sliderrow->callback(ComputeSpritesheet);
 
 		y += sliderrow->h() + 20;
-		slidersplit = new Fl_Hor_Value_Slider(x, y, win->w() - x - 10, 20, "Split into seperate files");
-		slidersplit->step(2);
-		slidersplit->maximum(10);
-		slidersplit->minimum(0);
-		slidersplit->value(0);
-		slidersplit->deactivate();
-		slidersplit->color(colorbut);
-		slidersplit->textcolor(colortext);
-		slidersplit->labelcolor(colortext);
-		slidersplit->callback(ComputeSpritesheet);
+		slidersplit_h = new Fl_Hor_Value_Slider(x, y, (win->w() / 2) - x, 20, "Split into horizontal blocks");
+		slidersplit_h->step(2);
+		slidersplit_h->maximum(10);
+		slidersplit_h->minimum(0);
+		slidersplit_h->value(0);
+		slidersplit_h->deactivate();
+		slidersplit_h->color(colorbut);
+		slidersplit_h->textcolor(colortext);
+		slidersplit_h->labelcolor(colortext);
+		slidersplit_h->callback(ComputeSpritesheet);
+
+		slidersplit_w = new Fl_Hor_Value_Slider(x + slidercol->w() + 20, y, (win->w() / 2) - x - 20, 20, "Split into vertical blocks");
+		slidersplit_w->step(2);
+		slidersplit_w->maximum(10);
+		slidersplit_w->minimum(0);
+		slidersplit_w->value(0);
+		slidersplit_w->deactivate();
+		slidersplit_w->color(colorbut);
+		slidersplit_w->textcolor(colortext);
+		slidersplit_w->labelcolor(colortext);
+		slidersplit_w->callback(ComputeSpritesheet);
 
 
 		//		y += slidercol->h() + 50;
@@ -317,7 +331,7 @@ void setupGUI(int argc, char** argv) {
 		//			"    Tars<font color=#55f>&lt;Ctrl-I&gt;</font>*.{tar,tar.gz}\n"
 		//			"    Apps<font color=#55f>&lt;Ctrl-I&gt;</font>*.app\n");
 
-		y += slidersplit->h() + 50;
+		y += slidersplit_h->h() + 50;
 		Fl_Group* grp = new Fl_Group(x, y, win->w() * 0.97, win->h() * 0.815);
 		stitchResultView = new Fl_OpenCV(x, y, win->w() * 0.97, win->h() * 0.815);
 		grp->resizable(stitchResultView);

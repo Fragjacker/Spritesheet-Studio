@@ -148,16 +148,19 @@ void resetColsAndRows()
 /// <param name="cols"></param>
 /// <param name="subdiv"></param>
 /// <returns></returns>
-list<Mat>* stitchimages(Imagelist& imglist, int rows, int cols, int subdiv) {
+list<Mat>* stitchimages(Imagelist& imglist, int rows, int cols, int subdiv_w, int subdiv_h) {
 	Mat* result;
 	list<Mat> worklist = imglist.getList();
 	list<Mat>* returnlist = new list<Mat>();
 	worklist.reverse();
 	list<Mat>::iterator it = worklist.begin();
-	int num_chunks = (subdiv < 2) ? 1 : (subdiv * subdiv), num_slices = (subdiv < 2) ? 1 : subdiv;
-	for (size_t s = 0; s < num_chunks; s++)
+	int num_chunks_w = (subdiv_w < 2) ? 1 : subdiv_w,
+		num_chunks_h = (subdiv_h < 2) ? 1 : subdiv_h,
+		num_slices_h = (subdiv_h < 2) ? 1 : subdiv_h,
+		num_slices_w = (subdiv_w < 2) ? 1 : subdiv_w;
+	for (size_t s = 0; s < (num_chunks_w * num_chunks_h); s++)
 	{
-		ImageCells cells = ImageCells(rows / num_slices, cols / num_slices, worklist.begin()->cols, worklist.begin()->rows);
+		ImageCells cells = ImageCells(rows / num_slices_h, cols / num_slices_w, worklist.begin()->cols, worklist.begin()->rows);
 		for (size_t j = 0; j < (cells.getrows()); j++)
 		{
 			for (size_t i = 0; i < (cells.getcols()); i++)
