@@ -8,13 +8,13 @@ Fl_Color colorbut = fl_rgb_color(90, 90, 90);
 Fl_Color colortext = fl_rgb_color(180, 180, 180);
 Fl_Hor_Value_Slider* sliderrow = NULL;
 Fl_Hor_Value_Slider* slidercol = NULL;
+Fl_Hor_Value_Slider* slidersplit = NULL;
 Fl_Output* G_filename = NULL;
 Fl_Button* butsave = NULL;
 Fl_OpenCV* stitchResultView = NULL;
 Imagelist* img = NULL;
 list<Mat>* m = NULL;
 Mat* m_temp = NULL;
-int total_imgs = 0;
 const char* G_appname = "Spritesheet-Studio";
 const char* G_filterlist = "Portable network graphics\t*.png\n"
 "DirectDraw Surface Image\t*.dds";
@@ -64,14 +64,16 @@ void PreLoadImages(Fl_Native_File_Chooser& chooser) {
 
 void setupUserInputs(int num_images, int num_bad_imgs)
 {
-	total_imgs = num_images - num_bad_imgs;
+	int total_imgs = num_images - num_bad_imgs, num_sqrt_imgs = std::ceil(std::sqrt(total_imgs));
 	sliderrow->maximum(total_imgs);
 	slidercol->maximum(total_imgs);
-	sliderrow->value(std::ceil(std::sqrt(total_imgs)));
-	slidercol->value(std::ceil(std::sqrt(total_imgs)));
+	slidersplit->maximum(num_sqrt_imgs);
+	sliderrow->value(num_sqrt_imgs);
+	slidercol->value(num_sqrt_imgs);
 	G_filename->value(std::to_string(total_imgs).c_str());
 	slidercol->activate();
 	sliderrow->activate();
+	slidersplit->activate();
 	butsave->activate();
 }
 
@@ -87,7 +89,7 @@ void ComputeSpritesheet(Fl_Widget*, void*) {
 /// Retrieves the Spritesheet preview image and shows it in the window as a preview.
 /// </summary>
 void updateSpritePreview() {
-	m = stitchimages(*img, (int)sliderrow->value(), (int)slidercol->value(), 2);
+	m = stitchimages(*img, (int)sliderrow->value(), (int)slidercol->value(), (int)slidersplit->value());
 	delete m_temp;
 	m_temp = new Mat(*m->begin());
 	resize(*m_temp, *m_temp, Size(stitchResultView->w(), stitchResultView->h()), 0, 0, INTER_CUBIC);
@@ -184,7 +186,7 @@ void setupGUI(int argc, char** argv) {
 	if (argc > argn && strncmp(argv[1], "-psn_", 5) == 0)
 		argn++;
 #endif
-	Fl_Window* win = new Fl_Window(800, 900, G_appname);
+	Fl_Window* win = new Fl_Window(800, 950, G_appname);
 	win->size_range(win->w(), win->h(), 0, 0);
 	win->color(colorbg);
 	win->begin();
@@ -245,6 +247,18 @@ void setupGUI(int argc, char** argv) {
 		sliderrow->labelcolor(colortext);
 		sliderrow->callback(ComputeSpritesheet);
 
+		y += sliderrow->h() + 20;
+		slidersplit = new Fl_Hor_Value_Slider(x, y, win->w() - x - 10, 20, "Split into seperate files");
+		slidersplit->step(2);
+		slidersplit->maximum(10);
+		slidersplit->minimum(0);
+		slidersplit->value(0);
+		slidersplit->deactivate();
+		slidersplit->color(colorbut);
+		slidersplit->textcolor(colortext);
+		slidersplit->labelcolor(colortext);
+		slidersplit->callback(ComputeSpritesheet);
+
 
 		//		y += slidercol->h() + 50;
 		//		Fl_Help_View* view = new Fl_Help_View(x, y, win->w() * 0.8, 200);
@@ -268,9 +282,9 @@ void setupGUI(int argc, char** argv) {
 		//			"    Tars<font color=#55f>&lt;Ctrl-I&gt;</font>*.{tar,tar.gz}\n"
 		//			"    Apps<font color=#55f>&lt;Ctrl-I&gt;</font>*.app\n");
 
-		y += sliderrow->h() + 50;
-		Fl_Group* grp = new Fl_Group(x, y, win->w() * 0.97, win->h() * 0.85);
-		stitchResultView = new Fl_OpenCV(x, y, win->w() * 0.97, win->h() * 0.85);
+		y += slidersplit->h() + 50;
+		Fl_Group* grp = new Fl_Group(x, y, win->w() * 0.97, win->h() * 0.815);
+		stitchResultView = new Fl_OpenCV(x, y, win->w() * 0.97, win->h() * 0.815);
 		grp->resizable(stitchResultView);
 		grp->color(fl_rgb_color(20, 20, 20));
 		grp->box(FL_FLAT_BOX);
