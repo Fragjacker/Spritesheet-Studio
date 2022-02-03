@@ -1,11 +1,11 @@
-![spritesheet_studio](https://user-images.githubusercontent.com/19975052/149983600-d8ebfa0b-4131-48d9-bf53-a35530a025eb.png)
+![spritesheet_studio_image](https://user-images.githubusercontent.com/19975052/152341382-09965907-6432-4489-9711-81d4412252be.png)
 # Spritesheet-Studio
-C++ app that helps to quickly create spritesheets out of multiple images via a GUI. It uses OpenCV for the image manipulation and FLTK for the GUI. Precompiled binaries are available for windows currently.
+C++ app that helps to quickly create spritesheets out of multiple images via a GUI. It uses OpenCV for the image manipulation and FLTK for the GUI. Precompiled binaries are available for windows only currently. However the multi-platform nature of this project and its dependacies should make it possible to build this app on Linux and MacOS natively too.
 # Supported Image Formats
 - **PNG (READ/WRITE)**
 - **DDS (READ ONLY)**
 
-The final spritesheet will be stored in the folder of the executable. The file format will be **PNG** by default.
+The final spritesheet will be stored in the folder of the executable. The file format will be **PNG** with maximum compression by default. The filename can be changed via the input field.
 # Platform Build Requirements
 The app code is opted for multiplattform support. However the build requirements may vary and require user intervention to function.
 ## Windows
